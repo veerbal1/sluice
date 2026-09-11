@@ -12,3 +12,10 @@ services:
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # ek broker hai, copy kahan banegi
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false" # topic hum khud banayenge, soch kar
+  postgres:
+    image: postgres:17
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: sluice
+      POSTGRES_DB: sluices
