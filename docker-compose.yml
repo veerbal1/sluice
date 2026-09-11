@@ -1,0 +1,14 @@
+services:
+  kafka:
+    image: apache/kafka:3.9.0
+    ports:
+      - "9092:9092" # laptop se broker tak
+    environment:
+      KAFKA_NODE_ID: 1 # is broker ka number
+      KAFKA_PROCESS_ROLES: broker,controller # ek hi container dono kaam kare
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093 # controller kaun hai — yeh khud
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092 # clients ko kaun sa pata bataye
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1 # ek broker hai, copy kahan banegi
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false" # topic hum khud banayenge, soch kar
