@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os/signal"
 	"strconv"
 	"sync"
 	"sync/atomic"
+	"syscall"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -28,8 +30,16 @@ func drain(ch <-chan kafka.Message, max int) []kafka.Message {
 }
 
 func main() {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
 	channel := make(chan kafka.Message, 4096)
-	kafkaW := &kafka.Writer{Addr: kafka.TCP("localhost:9092"), Topic: "events", Balancer: &kafka.Hash{}, BatchTimeout: time.Millisecond}
+	kafkaW := &kafka.Writer{
+		Addr:         kafka.TCP("localhost:9092"),
+		Topic:        "events",
+		Balancer:     &kafka.Hash{},
+		BatchTimeout: time.Millisecond,
+		RequiredAcks: kafka.RequireAll,
+	}
 	defer kafkaW.Close()
 	var id atomic.Int64
 
@@ -43,7 +53,7 @@ func main() {
 			for {
 				msgs := drain(channel, 100)
 
-				err := kafkaW.WriteMessages(context.Background(), msgs...)
+				err := kafkaW.WriteMessages(ctx, msgs...)
 				if err != nil {
 					fmt.Println("Error: ", err)
 				}

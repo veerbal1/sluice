@@ -1,1 +1,5 @@
 *.md
+seen.log
+run*.out
+temp.txt
+slow.log
